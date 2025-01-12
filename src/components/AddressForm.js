@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-
+import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import FormLabel from "@mui/material/FormLabel";
@@ -154,10 +154,17 @@ export default function AddressForm() {
     setEmail(userParams.email);
     setAlamat(userParams.alamat);
     setNumber(userParams.nomor_telepon);
-    // setTanggalLahir(tgl_lahirx);
-    // setKewarganegaraan(kewarganegaraanx);
+    setTanggalLahir(userParams.tgl_lahir ? dayjs(userParams.tgl_lahir) : null);
+    if (userParams.kewarganegaraan === "Indonesia") {
+      setKewarganegaraan(0);
+    } else {
+      setKewarganegaraan(1);
+      setNegaraSelected(userParams.kewarganegaraan);
+    }
     setImage(userParams.image);
   }, []);
+  console.log(userParams.kewarganegaraan);
+
   return (
     <>
       <Collapse
@@ -314,7 +321,7 @@ export default function AddressForm() {
                 <Select
                   labelId="wni"
                   id="wni"
-                  // value={kewarganegaraan}
+                  value={kewarganegaraan}
                   label="Age"
                   onChange={(e) => setKewarganegaraan(e.target.value)}
                 >
@@ -328,7 +335,12 @@ export default function AddressForm() {
                     id="negara"
                     options={negara}
                     getOptionLabel={(option) => option.negara}
-                    onChange={(event, newValue) => setNegaraSelected(newValue)}
+                    value={
+                      negara.find((n) => n.negara === negaraSelected) || null
+                    } // Sinkronisasi nilai
+                    onChange={(event, newValue) =>
+                      setNegaraSelected(newValue ? newValue.negara : null)
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
