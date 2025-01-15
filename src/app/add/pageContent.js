@@ -16,23 +16,38 @@ import AppTheme from "../../shared-theme/AppTheme";
 import ColorModeIconDropdown from "../../shared-theme/ColorModeIconDropdown";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { IconButton } from "@mui/material";
-
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 export default function PageContent(props) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [info, setInfo] = React.useState({});
 
   const userParams = useMemo(() => {
     return {
       id: searchParams.get("id") || "",
-      name: searchParams.get("name") || "",
-      email: searchParams.get("email") || "",
-      alamat: searchParams.get("alamat") || "",
-      nomor_telepon: searchParams.get("nomor_telepon") || "",
-      tgl_lahir: searchParams.get("tgl_lahir") || "",
-      kewarganegaraan: searchParams.get("kewarganegaraan") || "",
-      image: searchParams.get("image") || "",
     };
   }, [searchParams]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (userParams.id) {
+        let { data: info, error } = await supabase
+          .from("info")
+          .select("*")
+          .eq("id", userParams.id);
+        if (error) {
+          console.error("Error fetching data:", error);
+        } else {
+          setInfo(info[0]);
+        }
+      }
+    };
+    fetchData();
+  }, [userParams.id]);
 
   return (
     <AppTheme {...props}>
@@ -111,11 +126,11 @@ export default function PageContent(props) {
             >
               <div>
                 <Typography variant="subtitle2" gutterBottom>
-                  {userParams.name}
+                  {info.name}
                 </Typography>
-                <Typography variant="body1">{userParams.email}</Typography>
+                <Typography variant="body1">{info.email}</Typography>
               </div>
-              <InfoMobile totalPrice={userParams.name} />
+              <InfoMobile totalPrice={info.name} />
             </CardContent>
           </Card>
 

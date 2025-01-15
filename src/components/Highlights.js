@@ -92,13 +92,6 @@ export default function Highlights() {
   const handleEdit = (item) => {
     const id = {
       id: item.id,
-      name: item.name,
-      email: item.email,
-      alamat: item.alamat,
-      nomor_telepon: item.nomor_telepon,
-      tgl_lahir: item.tgl_lahir,
-      kewarganegaraan: item.kewarganegaraan,
-      image: item.image,
     };
     const query = new URLSearchParams(id).toString();
     router.push(`/add?${query}`);
@@ -408,7 +401,8 @@ export default function Highlights() {
               size={{ xs: 12, sm: 6, md: 4 }}
               key={index}
               onClick={() => {
-                console.log(item);
+                // console.log(item);
+                handleEdit(item);
               }}
               sx={{
                 cursor: "pointer",

@@ -24,7 +24,11 @@ import { Alert, AlertTitle } from "@mui/material";
 import Collapse from "@mui/material/Collapse";
 import CloseIcon from "@mui/icons-material/Close";
 import { useRouter } from "next/navigation";
-
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 const FormGrid = styled(Grid)(() => ({
   display: "flex",
   flexDirection: "column",
@@ -44,20 +48,43 @@ export default function AddressForm() {
   const [tanggalLahir, setTanggalLahir] = React.useState(null);
   const [negaraSelected, setNegaraSelected] = React.useState("");
   const [image, setImage] = React.useState(null);
+  const [info, setInfo] = React.useState({});
   const router = useRouter();
   const searchParams = useSearchParams();
   const userParams = React.useMemo(() => {
     return {
       id: searchParams.get("id") || "",
-      name: searchParams.get("name") || "",
-      email: searchParams.get("email") || "",
-      alamat: searchParams.get("alamat") || "",
-      nomor_telepon: searchParams.get("nomor_telepon") || "",
-      tgl_lahir: searchParams.get("tgl_lahir") || "",
-      kewarganegaraan: searchParams.get("kewarganegaraan") || "",
-      image: searchParams.get("image") || "",
     };
   }, [searchParams]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (userParams.id) {
+        let { data: info, error } = await supabase
+          .from("info")
+          .select("*")
+          .eq("id", userParams.id);
+        if (error) {
+          console.error("Error fetching data:", error);
+        } else {
+          // setInfo(info[0]);
+          setNama(info[0].name);
+          setEmail(info[0].email);
+          setAlamat(info[0].alamat);
+          setNumber(info[0].nomor_telepon);
+          setTanggalLahir(info[0].tgl_lahir ? dayjs(info[0].tgl_lahir) : null);
+          if (info[0].kewarganegaraan === "Indonesia") {
+            setKewarganegaraan(0);
+          } else {
+            setKewarganegaraan(1);
+            setNegaraSelected(info[0].kewarganegaraan);
+          }
+          setImage(info[0].image);
+        }
+      }
+    };
+    fetchData();
+  }, [userParams.id]);
   const handleUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -148,22 +175,6 @@ export default function AddressForm() {
     { negara: "Thailand" },
     { negara: "Australia" },
   ];
-
-  React.useEffect(() => {
-    setNama(userParams.name);
-    setEmail(userParams.email);
-    setAlamat(userParams.alamat);
-    setNumber(userParams.nomor_telepon);
-    setTanggalLahir(userParams.tgl_lahir ? dayjs(userParams.tgl_lahir) : null);
-    if (userParams.kewarganegaraan === "Indonesia") {
-      setKewarganegaraan(0);
-    } else {
-      setKewarganegaraan(1);
-      setNegaraSelected(userParams.kewarganegaraan);
-    }
-    setImage(userParams.image);
-  }, []);
-  console.log(userParams.kewarganegaraan);
 
   return (
     <>
